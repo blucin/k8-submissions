@@ -1,0 +1,16 @@
+# Rust build artifacts
+target/
+**/*.rs.bk
+*.pdb
+
+# IDE and Editor files
+# Visual Studio Code
+.vscode/
+.zed/
+*.code-workspace
+
+# Docker
+.dockerignore
+
+# Kubernetes
+*.kubeconfig
