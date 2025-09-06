@@ -19,12 +19,5 @@ k3d image import the-project:latest
 3. Run the deployment using kubectl
 
 ```bash
-kubectl create deployment the-project-deployment --image=the-project:latest
-
-# Use local image, ugly because we avoided the config file
-kubectl patch deployment the-project-deployment -p '{"spec":{"template":{"spec":{"containers":[{"name":"the-project","image":"the-project:latest","imagePullPolicy":"Never"}]}}}}'
-
-# Use your pod name!!
-kubectl get pods
-kubectl logs the-project-deployment-5f7d7d6c65-sszh4
+kubectl apply -f manifests/deployment.yaml
 ```
