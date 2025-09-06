@@ -19,13 +19,5 @@ k3d image import log-output:latest
 3. Run the deployment using kubectl
 
 ```bash
-kubectl create deployment log-output-deployment --image=log-output:latest
-
-# Use local image, ugly because we avoided the config file
-kubectl patch deployment log-output-deployment -p '{"spec":{"template":{"spec":{"containers":[{"name":"log-output","image":"log-output:latest","imagePullPolicy":"Never"}]}}}}'
-
-kubectl get pods
-
-# Use your pod name!!
-kubectl logs log-output-deployment-678fc5c4fb-sfmkk
+kubectl apply -f manifests/deployment.yaml
 ```
