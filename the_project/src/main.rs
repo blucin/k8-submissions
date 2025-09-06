@@ -16,7 +16,7 @@ async fn main() {
 
     let listener = match TcpListener::bind(format!("localhost:{}", port)).await {
         Ok(l) => {
-            info!("Listening on port {}", port);
+            info!("Server started in port {}", port);
             l
         }
         Err(e) => {
