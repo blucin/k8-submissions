@@ -22,7 +22,7 @@ k3d image import log-output:latest
 kubectl create deployment log-output-deployment --image=log-output:latest
 
 # Use local image, ugly because we avoided the config file
-kubectl patch deployment my-app-deployment -p '{"spec":{"template":{"spec":{"containers":[{"name":"my-rust-app","imagePullPolicy":"Never"}]}}}}'
+kubectl patch deployment log-output-deployment -p '{"spec":{"template":{"spec":{"containers":[{"name":"log-output","image":"log-output:latest","imagePullPolicy":"Never"}]}}}}'
 
 kubectl get pods
 
