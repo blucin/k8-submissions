@@ -6,3 +6,4 @@ Repo containing submissions made to devops with k8s course by mooc.fi
 ### Chapter 2
 
 - [1.1.](https://github.com/blucin/k8-submissions/tree/1.1/log_output)
+- [1.2.](https://github.com/blucin/k8-submissions/tree/1.2/the_project)
