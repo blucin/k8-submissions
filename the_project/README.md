@@ -20,4 +20,9 @@ k3d image import the-project:latest
 
 ```bash
 kubectl apply -f manifests/deployment.yaml
+
+kubectl get pods
+
+# Test the server, use your pod name
+kubectl port-forward the-project-deployment-897564dc4-cmfdl 8080:8080
 ```

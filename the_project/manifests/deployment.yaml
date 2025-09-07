@@ -16,3 +16,6 @@ spec:
         - name: the-project
           image: the-project:latest
           imagePullPolicy: Never
+          env:
+            - name: PORT
+              value: "8080"
