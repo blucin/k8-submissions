@@ -4,9 +4,9 @@ This is a project to learn kubernetes from the MOOC.fi course "DevOps with Kuber
 
 ## Getting Started
 
-1. Make sure your local k3d cluster is running
+1. Make sure your local k3d cluster is running with required configuration
 ```bash
-k3d cluster create -a 2
+k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2
 ```
 
 2. Build the Docker image and import it to your local k3d cluster
@@ -20,9 +20,8 @@ k3d image import the-project:latest
 
 ```bash
 kubectl apply -f manifests/deployment.yaml
+kubectl apply -f manifests/service.yaml
 
-kubectl get pods
-
-# Test the server, use your pod name
-kubectl port-forward the-project-deployment-897564dc4-cmfdl 8080:8080
+# Test the server
+curl http://localhost:8082
 ```
