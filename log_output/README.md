@@ -20,4 +20,13 @@ k3d image import log-output:latest
 
 ```bash
 kubectl apply -f manifests/deployment.yaml
+kubectl apply -f manifests/service.yaml
+kubectl apply -f manifests/ingress.yaml
+```
+
+4. Access the application from your browser at `http://localhost:8081`
+
+Expected output
+```bash
+2025-10-22T15:25:41Z: a4b6ff12-e2dc-431e-a48e-077bb18f5044
 ```
