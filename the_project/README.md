@@ -21,7 +21,8 @@ k3d image import the-project:latest
 ```bash
 kubectl apply -f manifests/deployment.yaml
 kubectl apply -f manifests/service.yaml
+kubectl apply -f manifests/ingress.yaml
 
-# Test the server
-curl http://localhost:8082
+# Test the page
+http://localhost:8081
 ```
