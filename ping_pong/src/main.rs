@@ -1,17 +1,35 @@
-use axum::{
-    routing::get,
-    Router,
-};
-use tokio::net::TcpListener;
+use axum::extract::State;
+use axum::{Router, routing::get};
 use std::env;
-use tracing::{info, error};
+use std::io::Write;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use axum::extract::State;
+use tokio::net::TcpListener;
+use tracing::{error, info};
+
+const FILE_PATH: &str = "/opt/logger/output.log";
 
 async fn pinger(State(counter): State<Arc<AtomicUsize>>) -> String {
     let n: usize = counter.fetch_add(1, Ordering::SeqCst);
-    format!("pong {}", n)
+    let data = format!("Ping / Pongs: {}", n);
+    match std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(FILE_PATH)
+    {
+        Ok(mut f) => {
+            if let Err(e) = writeln!(f, "{}", data) {
+                error!("Failed to write to log file: {}", e);
+                "Error writing log file".to_string()
+            } else {
+                data
+            }
+        }
+        Err(e) => {
+            error!("Failed to open log file: {}", e);
+            "Error writing log file".to_string()
+        }
+    }
 }
 
 #[tokio::main]
@@ -24,7 +42,6 @@ async fn main() {
     let app = Router::new()
         .route("/pingpong", get(pinger))
         .with_state(counter);
-
 
     let listener = match TcpListener::bind(format!("0.0.0.0:{}", port)).await {
         Ok(l) => {
@@ -41,4 +58,3 @@ async fn main() {
         error!("Server error: {}", e);
     }
 }
-

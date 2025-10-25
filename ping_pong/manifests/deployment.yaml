@@ -12,9 +12,16 @@ spec:
       labels:
         app: ping-pong
     spec:
+      volumes:
+        - name: ping-pong-volume
+          persistentVolumeClaim:
+            claimName: log-ping-pv-claim
       containers:
         - name: ping-pong
           image: ping-pong:latest
           imagePullPolicy: Never
+          volumeMounts:
+            - name: ping-pong-volume
+              mountPath: /opt/logger
           ports:
             - containerPort: 3000

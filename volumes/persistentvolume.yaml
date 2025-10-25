@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: log-ping-pv
+spec:
+  storageClassName: my-log-ping-pv
+  capacity:
+    storage: 200Mi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  local:
+    path: /tmp/kube
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - k3d-k3s-default-agent-0

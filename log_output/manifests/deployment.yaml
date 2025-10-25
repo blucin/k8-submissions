@@ -14,7 +14,8 @@ spec:
     spec:
       volumes:
         - name: log-output-volume
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: log-ping-pv-claim
       containers:
         - name: log-output-reader
           image: log-output:reader
