@@ -4,4 +4,6 @@ WORKDIR /app
 COPY . .
 RUN cargo build --release
 
+ENV APPLICATION_TYPE=writer
+
 CMD ["./target/release/log_output"]
