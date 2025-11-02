@@ -17,3 +17,4 @@ Repo containing submissions made to devops with k8s course by mooc.fi
 - [1.10.](https://github.com/blucin/k8-submissions/tree/1.10/log_output)
 - [1.11.](https://github.com/blucin/k8-submissions/tree/1.11/volumes)
 - [1.12.](https://github.com/blucin/k8-submissions/tree/1.12/the_project)
+- [1.13.](https://github.com/blucin/k8-submissions/tree/1.13/the_project)

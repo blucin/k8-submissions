@@ -90,8 +90,22 @@ async fn fetch_image() {
 
 async fn home() -> Html<&'static str> {
     Html(
-        r#"<h1>The Project App</h1>
+        r#"
+        <h1>The Project App</h1>
         <img src="/image" alt="Random Image" width="600"/><br/>
+
+        <section>
+            <label for="todo-input">New todo (max 140 chars):</label><br/>
+            <input id="todo-input" type="text" maxlength="140"/>
+            <button id="send-btn" type="button">Create todo</button>
+
+            <ul id="todos">
+                <li>Buy groceries</li>
+                <li>Build a robot who takes over the world</li>
+                <li>Eat frozen yogurt</li>
+            </ul>
+        </section>
+
         DevOps with Kubernetes 2025
         "#,
     )
