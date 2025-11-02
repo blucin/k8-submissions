@@ -12,6 +12,10 @@ spec:
       labels:
         app: the-project
     spec:
+      volumes:
+        - name: the-project-volume
+          persistentVolumeClaim:
+            claimName: the-project-pv-claim
       containers:
         - name: the-project
           image: the-project:latest
@@ -19,3 +23,6 @@ spec:
           env:
             - name: PORT
               value: "8080"
+          volumeMounts:
+            - name: the-project-volume
+              mountPath: /opt/project
