@@ -2,10 +2,6 @@
 
 This is a sample application project to learn kubernetes from the MOOC.fi course "DevOps with Kubernetes".
 
-This application uses a shared ingress resource from log_output:
-
-- [Shared Ingress File](https://github.com/blucin/k8-submissions/tree/1.9/log_output/manifests/ingress.yaml)
-
 ## Getting Started
 
 1. Make sure your local k3d cluster is running
@@ -23,11 +19,25 @@ k3d image import ping-pong:latest
 3. Run the deployment using kubectl
 
 ```bash
-kubectl apply -f manifests/
-kubectl apply -f ../log_output/manifests/
+kubectl apply -f manifests/deployment.yaml
+kubectl apply -f manifests/service.yaml
 ```
 
-4. Access the application from your browser at
-- `http://localhost:8081/` -> `2025-10-25T08:16:42Z: cd099996-3106-41b6-9d23-304788951af3` (log_output)
-- `http://localhost:8081/pingpong` -> `ping 0` (ping_pong)
+> Excerise did not recommend any method to expose the service to host machine, so I used port forwarding for simplicity.
+
+4. Port forward the service to localhost
+
+```bash
+kubectl port-forward svc/ping-pong-service 3000:3000
+```
+
+5. Access the application from your browser at `http://localhost:3000/pingpong`
+
+Expected output
+```
+Error writing log file
+```
+
+It increments the in-memory counter behind the scenes each time you refresh the page. The error is expected as the excerise did not insist on cleanin up the old logic so I did not bother fixing it.
+
 

@@ -32,6 +32,11 @@ async fn pinger(State(counter): State<Arc<AtomicUsize>>) -> String {
     }
 }
 
+async fn pings(State(counter): State<Arc<AtomicUsize>>) -> String {
+    let n: usize = counter.load(Ordering::SeqCst);
+    format!("Pings / Pongs: {}", n)
+}
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
@@ -41,6 +46,7 @@ async fn main() {
     let counter = Arc::new(AtomicUsize::new(0));
     let app = Router::new()
         .route("/pingpong", get(pinger))
+        .route("/pings", get(pings))
         .with_state(counter);
 
     let listener = match TcpListener::bind(format!("0.0.0.0:{}", port)).await {

@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: ping-pong-service
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: ping-pong
   ports:
@@ -11,4 +11,5 @@ spec:
       protocol: TCP
       port: 3000
       targetPort: 3000
+      nodePort: 30300
 

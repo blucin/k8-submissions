@@ -7,6 +7,9 @@ use std::time::Duration;
 use tokio::net::TcpListener;
 use tracing::{error, info};
 use uuid::Uuid;
+use reqwest::Client;
+
+const PING_PONG_URL: &str = "http://ping-pong-service:3000/pings";
 
 async fn timestamp() -> String {
     let now = Local::now();
@@ -24,12 +27,25 @@ async fn handle_root(file_path: &str) -> String {
     }
 }
 
+async fn handle_normal() -> String {
+    let timestamp_str = timestamp().await;
+    let client = Client::new();
+    match client.get(PING_PONG_URL).send().await {
+        Ok(response) => {
+            match response.text().await {
+                Ok(pings) => format!("{}\n{}", timestamp_str, pings.trim()),
+                Err(_) => timestamp_str,
+            }
+        }
+        Err(_) => timestamp_str,
+    }
+}
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    // reader or writer mode
-    let application_type = env::var("APPLICATION_TYPE").unwrap_or_else(|_| "reader".to_string());
+    let application_type = env::var("APPLICATION_TYPE").unwrap_or_else(|_| "normal".to_string());
     let port = "5678";
     let log_path = "/opt/logger/output.log";
 
@@ -57,11 +73,15 @@ async fn main() {
             sleep(Duration::new(5, 0));
         }
     } else {
-        info!("Starting in reader mode");
-
-        let app = Router::new().route("/", get(move || async move {
-            handle_root(log_path).await
-        }));
+        let app = if application_type == "reader" {
+            info!("Starting in reader mode");
+            Router::new().route("/", get(move || async move {
+                handle_root(log_path).await
+            }))
+        } else {
+            info!("Starting in normal mode");
+            Router::new().route("/", get(handle_normal))
+        };
 
         let listener = match TcpListener::bind(format!("0.0.0.0:{}", port)).await {
             Ok(l) => {

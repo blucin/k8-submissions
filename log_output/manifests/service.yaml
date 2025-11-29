@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: log-output-service
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: log-output
   ports:
@@ -11,3 +11,4 @@ spec:
       protocol: TCP
       port: 5678
       targetPort: 5678
+      nodePort: 30678

@@ -12,20 +12,7 @@ spec:
       labels:
         app: log-output
     spec:
-      volumes:
-        - name: log-output-volume
-          persistentVolumeClaim:
-            claimName: log-ping-pv-claim
       containers:
-        - name: log-output-reader
-          image: log-output:reader
+        - name: log-output
+          image: log-output:latest
           imagePullPolicy: Never
-          volumeMounts:
-            - name: log-output-volume
-              mountPath: /opt/logger
-        - name: log-output-writer
-          image: log-output:writer
-          imagePullPolicy: Never
-          volumeMounts:
-            - name: log-output-volume
-              mountPath: /opt/logger
