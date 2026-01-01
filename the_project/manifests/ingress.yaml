@@ -15,5 +15,12 @@ spec:
               service:
                 name: the-project-service
                 port:
-                  number: 1234
+                  number: 3000
+          - path: /todos
+            pathType: Prefix
+            backend:
+              service:
+                name: todo-backend
+                port:
+                  number: 3000
 

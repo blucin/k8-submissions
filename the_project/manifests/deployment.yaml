@@ -18,11 +18,14 @@ spec:
             claimName: the-project-pv-claim
       containers:
         - name: the-project
-          image: the-project:latest
-          imagePullPolicy: Never
+          image: k3d-local-registry:5000/todo-app:latest
           env:
             - name: PORT
-              value: "8080"
+              value: "3001"
+            - name: APPLICATION_TYPE
+              value: "app"
+            - name: BACKEND_URL
+              value: "http://todo-backend:3000"
           volumeMounts:
             - name: the-project-volume
               mountPath: /opt/project

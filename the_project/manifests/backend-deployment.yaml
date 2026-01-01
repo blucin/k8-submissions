@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-backend
+  template:
+    metadata:
+      labels:
+        app: todo-backend
+    spec:
+      containers:
+        - name: todo-backend
+          image: k3d-local-registry:5000/todo-backend:latest
+          env:
+            - name: PORT
+              value: "3000"
+            - name: APPLICATION_TYPE
+              value: "backend"
