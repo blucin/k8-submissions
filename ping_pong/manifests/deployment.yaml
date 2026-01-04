@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ping-pong-deployment
+  namespace: exercises
 spec:
   replicas: 1
   selector:
@@ -14,7 +15,7 @@ spec:
     spec:
       containers:
         - name: ping-pong
-          image: ping-pong:latest
-          imagePullPolicy: Never
+          image: k3d-local-registry:5000/ping-pong:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
