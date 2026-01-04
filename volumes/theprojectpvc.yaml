@@ -3,6 +3,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: the-project-pv-claim
+  namespace: project
 spec:
   storageClassName: the-project-pv
   accessModes:

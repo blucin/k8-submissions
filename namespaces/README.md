@@ -14,3 +14,21 @@ To create the namespace:
 kubectl apply -f exercises.yaml
 ```
 
+## Project Namespace
+
+The `project.yaml` file defines the `project` namespace used by the following application:
+- The Project (todo-app with todo-backend)
+
+To create the namespace:
+
+```bash
+kubectl apply -f project.yaml
+```
+
+## Creating All Namespaces
+
+To create both namespaces at once:
+
+```bash
+kubectl apply -f .
+```
