@@ -21,7 +21,13 @@ kubectl apply -f ../namespaces/project.yaml
 kubens project
 ```
 
-4. Create the required resources using kubectl
+4. Create the required persistent volume directory in k3d node
+
+```bash
+docker exec k3d-k3s-default-agent-0 mkdir -p /tmp/kube
+```
+
+5. Create the required resources using kubectl
 
 ```bash
 docker build -f Dockerfile.app -t todo-app:latest .
@@ -39,7 +45,7 @@ kubectl apply -f manifests/
 > [!NOTE]
 > Note that the images are tagged as `localhost:5000` when pushing from the host machine, but the Kubernetes manifests reference them as `k3d-local-registry:5000` since that's the internal cluster DNS name.
 
-5. Access the application via Ingress
+6. Access the application via Ingress
 
 The application is accessed through the ingress controller. Visit:
 

@@ -17,7 +17,10 @@ spec:
         - name: todo-backend
           image: k3d-local-registry:5000/todo-backend:latest
           env:
-            - name: PORT
-              value: "3000"
             - name: APPLICATION_TYPE
               value: "backend"
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config
+                  key: BACKEND_PORT

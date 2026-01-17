@@ -21,12 +21,28 @@ spec:
         - name: the-project
           image: k3d-local-registry:5000/todo-app:latest
           env:
-            - name: PORT
-              value: "3001"
             - name: APPLICATION_TYPE
               value: "app"
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config
+                  key: APP_PORT
             - name: BACKEND_URL
-              value: "http://todo-backend:3000"
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config
+                  key: BACKEND_URL
+            - name: IMAGE_CACHE_TIME
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config
+                  key: IMAGE_CACHE_TIME
+            - name: PICSUM_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config
+                  key: PICSUM_URL
           volumeMounts:
             - name: the-project-volume
               mountPath: /opt/project

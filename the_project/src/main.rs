@@ -17,8 +17,6 @@ use tracing::{error, info};
 
 const IMAGE_PATH: &str = "/opt/project/pic.jpg";
 const META_FILE_PATH: &str = "/opt/project/meta.json";
-const PICSUM_URL: &str = "https://picsum.photos/1200";
-const CACHE_TIME: u64 = 10 * 60; // 10 minutes in seconds
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct ImageMeta {
@@ -64,15 +62,21 @@ fn write_meta(meta: &ImageMeta) {
 }
 
 async fn fetch_image() {
+    let picsum_url = env::var("PICSUM_URL").unwrap_or_else(|_| "https://picsum.photos/1200".to_string());
+    let cache_time = env::var("IMAGE_CACHE_TIME")
+        .unwrap_or_else(|_| "600".to_string())
+        .parse::<u64>()
+        .unwrap_or(600);
+    
     let mut meta = read_meta().unwrap_or(ImageMeta { last_fetched: 0 });
     let current_time = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_secs();
-    let cache_expired = meta.last_fetched + CACHE_TIME < current_time;
+    let cache_expired = meta.last_fetched + cache_time < current_time;
 
     if cache_expired {
-        let response = match reqwest::get(PICSUM_URL).await {
+        let response = match reqwest::get(&picsum_url).await {
             Ok(resp) => resp,
             Err(e) => {
                 error!("Failed to fetch image: {}", e);
