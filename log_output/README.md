@@ -29,11 +29,13 @@ docker push localhost:5000/log-output:latest
 
 ```bash
 kubectl apply -f ../namespaces/exercises.yaml
+kubens exercises
 ```
 
 5. Run the deployment using kubectl
 
 ```bash
+kubectl apply -f manifests/configmap.yaml
 kubectl apply -f manifests/deployment.yaml
 kubectl apply -f manifests/service.yaml
 ```
@@ -49,8 +51,10 @@ kubectl port-forward svc/log-output-service 5678:5678 -n exercises
 7. Access the application from your browser at `http://localhost:5678/`
 
 Expected output
-```bash
-2025-11-29T13:52:53Z: a08dbf9f-c459-407e-9fcc-610999c64d73
+```
+file content: it is what it is, a text from the file
+env variable: MESSAGE=hello world
+2026-01-17T12:21:11Z: 631ce58f-dce5-4018-9fcf-98283c58c592
 Pings / Pongs: 2
 ```
 

@@ -16,4 +16,20 @@ spec:
       containers:
         - name: log-output
           image: k3d-local-registry:5000/log-output:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
+          env:
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: log-output-config
+                  key: MESSAGE
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: log-output-config
+            items:
+              - key: information.txt
+                path: information.txt

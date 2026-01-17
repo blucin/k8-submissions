@@ -29,15 +29,30 @@ async fn handle_root(file_path: &str) -> String {
 
 async fn handle_normal() -> String {
     let timestamp_str = timestamp().await;
+    let message = env::var("MESSAGE").unwrap_or_else(|_| "".to_string());
+    let mut output = String::new();
+    
+    if let Ok(file_content) = std::fs::read_to_string("/config/information.txt") {
+        output.push_str(&format!("file content: {}\n", file_content.trim()));
+    } else {
+        error!("Failed to read /config/information.txt");
+    }
+    
+    if !message.is_empty() {
+        output.push_str(&format!("env variable: MESSAGE={}\n", message));
+    } else {
+        error!("MESSAGE environment variable not set or empty");
+    }
+    
     let client = Client::new();
     match client.get(PING_PONG_URL).send().await {
         Ok(response) => {
             match response.text().await {
-                Ok(pings) => format!("{}\n{}", timestamp_str, pings.trim()),
-                Err(_) => timestamp_str,
+                Ok(pings) => format!("{}{}{}", output, timestamp_str, format!("\n{}", pings.trim())),
+                Err(_) => format!("{}{}", output, timestamp_str),
             }
         }
-        Err(_) => timestamp_str,
+        Err(_) => format!("{}{}", output, timestamp_str),
     }
 }
 
