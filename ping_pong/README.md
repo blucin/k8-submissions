@@ -20,11 +20,15 @@ docker push localhost:5000/ping-pong:latest
 
 ```bash
 kubectl apply -f ../namespaces/exercises.yaml
+kubens exercises
 ```
 
 4. Run the deployment using kubectl
 
 ```bash
+# First apply the Postgres statefulset (it creates the DB pod and PVC)
+kubectl apply -f manifests/postgres-statefulset.yaml
+
 kubectl apply -f manifests/deployment.yaml
 kubectl apply -f manifests/service.yaml
 ```
@@ -34,16 +38,16 @@ kubectl apply -f manifests/service.yaml
 5. Port forward the service to localhost
 
 ```bash
-kubectl port-forward svc/ping-pong-service 3000:3000 -n exercises
+kubectl port-forward svc/ping-pong-service 3000:3000
 ```
 
 6. Access the application from your browser at `http://localhost:3000/pingpong`
 
 Expected output
 ```
-Error writing log file
+Ping / Pongs: 1
 ```
 
-It increments the in-memory counter behind the scenes each time you refresh the page. The error is expected as the exercise did not insist on cleaning up the old logic so I did not bother fixing it.
+The application now persists the ping counter in a Postgres database.
 
 

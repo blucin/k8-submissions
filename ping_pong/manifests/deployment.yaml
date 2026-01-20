@@ -16,6 +16,21 @@ spec:
       containers:
         - name: ping-pong
           image: k3d-local-registry:5000/ping-pong:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
+          env:
+            - name: DATABASE_URL
+              value: "host=postgres-0.postgres-headless user=postgres password=postgres dbname=pingpong port=5432"
+            - name: POSTGRES_HOST
+              value: "postgres-0.postgres-headless"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "postgres"
+            - name: POSTGRES_DB
+              value: "pingpong"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: PGDATA
+              value: /pgdata
           ports:
             - containerPort: 3000

@@ -20,6 +20,7 @@ spec:
       containers:
         - name: the-project
           image: k3d-local-registry:5000/todo-app:latest
+          imagePullPolicy: Always
           env:
             - name: APPLICATION_TYPE
               value: "app"

@@ -16,6 +16,7 @@ spec:
       containers:
         - name: todo-backend
           image: k3d-local-registry:5000/todo-backend:latest
+          imagePullPolicy: Always
           env:
             - name: APPLICATION_TYPE
               value: "backend"
