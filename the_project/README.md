@@ -30,10 +30,8 @@ docker exec k3d-k3s-default-agent-0 mkdir -p /tmp/kube
 5. Create the required resources using kubectl
 
 ```bash
-docker build -f Dockerfile.app -t todo-app:latest .
-docker build -f Dockerfile.backend -t todo-backend:latest .
-docker tag todo-app:latest localhost:5000/todo-app:latest
-docker tag todo-backend:latest localhost:5000/todo-backend:latest
+docker build -f Dockerfile.app -t localhost:5000/todo-app:latest .
+docker build -f Dockerfile.backend -t localhost:5000/todo-backend:latest .
 docker push localhost:5000/todo-app:latest
 docker push localhost:5000/todo-backend:latest
 
@@ -52,5 +50,7 @@ The application is accessed through the ingress controller. Visit:
 ```
 http://localhost:8081
 ```
+
+The backend now uses a Postgres StatefulSet to persist todos. The database is deployed first and should reach Ready state before the backend tries to connect.
 
 ![The Project](../assets/the_project_screenshot.png)

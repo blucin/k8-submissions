@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-todos-headless
+  namespace: project
+spec:
+  clusterIP: None
+  selector:
+    app: postgres-todos
+  ports:
+    - port: 5432
+      name: postgres
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-todos
+  namespace: project
+spec:
+  serviceName: postgres-todos-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-todos
+  template:
+    metadata:
+      labels:
+        app: postgres-todos
+    spec:
+      initContainers:
+        - name: init-postgres-data
+          image: busybox
+          command: ["sh", "-c", "mkdir -p /pgdata && chmod 700 /pgdata"]
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /pgdata
+      containers:
+        - name: postgres
+          image: postgres:18.1-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "todos"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "postgres"
+            - name: PGDATA
+              value: /pgdata
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /pgdata
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        storageClassName: local-path
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 500Mi

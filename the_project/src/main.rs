@@ -1,7 +1,7 @@
 use axum::{
     extract::State,
     http::StatusCode,
-    response::{Html, IntoResponse, Response},
+    response::{Html, Response},
     routing::{get, post},
     Json, Router,
 };
@@ -10,10 +10,11 @@ use serde::{Deserialize, Serialize};
 use serde_json;
 use std::env;
 use std::fs;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::net::TcpListener;
 use tracing::{error, info};
+use tokio_postgres::NoTls;
 
 const IMAGE_PATH: &str = "/opt/project/pic.jpg";
 const META_FILE_PATH: &str = "/opt/project/meta.json";
@@ -28,9 +29,7 @@ struct Todo {
     text: String,
 }
 
-struct AppState {
-    todos: Mutex<Vec<String>>,
-}
+type DbClient = tokio_postgres::Client;
 
 fn read_meta() -> Option<ImageMeta> {
     match fs::read_to_string(META_FILE_PATH) {
@@ -188,21 +187,37 @@ async fn image_handler() -> Result<Response, StatusCode> {
 }
 
 // Backend handlers
-async fn get_todos(State(state): State<Arc<AppState>>) -> Json<Vec<String>> {
-    let todos = state.todos.lock().unwrap();
-    Json(todos.clone())
+async fn get_todos(State(client): State<Arc<DbClient>>) -> Json<Vec<String>> {
+    match client.query("SELECT text FROM todos ORDER BY id ASC", &[]).await {
+        Ok(rows) => {
+            let todos: Vec<String> = rows.iter().map(|row| row.get(0)).collect();
+            Json(todos)
+        }
+        Err(e) => {
+            error!("Failed to fetch todos: {}", e);
+            Json(vec![])
+        }
+    }
 }
 
 async fn post_todo(
-    State(state): State<Arc<AppState>>,
+    State(client): State<Arc<DbClient>>,
     Json(payload): Json<Todo>,
 ) -> StatusCode {
     if payload.text.len() > 140 {
         return StatusCode::BAD_REQUEST;
     }
-    let mut todos = state.todos.lock().unwrap();
-    todos.push(payload.text);
-    StatusCode::CREATED
+    
+    match client
+        .execute("INSERT INTO todos (text) VALUES ($1)", &[&payload.text])
+        .await
+    {
+        Ok(_) => StatusCode::CREATED,
+        Err(e) => {
+            error!("Failed to insert todo: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        }
+    }
 }
 
 #[tokio::main]
@@ -214,17 +229,81 @@ async fn main() {
 
     if app_type == "backend" {
         info!("Starting in backend mode on port {}", port);
-        let state = Arc::new(AppState {
-            todos: Mutex::new(vec![
-                "Buy groceries".to_string(),
-                "Build a robot who takes over the world".to_string(),
-                "Eat frozen yogurt".to_string(),
-            ]),
+        
+        // Get database URL from env or build from components
+        let database_url = match env::var("DATABASE_URL") {
+            Ok(u) => u,
+            Err(_) => {
+                let user = env::var("POSTGRES_USER").unwrap_or_else(|_| "postgres".to_string());
+                let pass = env::var("POSTGRES_PASSWORD").unwrap_or_else(|_| "postgres".to_string());
+                let db = env::var("POSTGRES_DB").unwrap_or_else(|_| "todos".to_string());
+                let host = env::var("POSTGRES_HOST").unwrap_or_else(|_| "postgres-todos-0.postgres-todos-headless".to_string());
+                let db_port = env::var("POSTGRES_PORT").unwrap_or_else(|_| "5432".to_string());
+                format!("host={} user={} password={} dbname={} port={}", host, user, pass, db, db_port)
+            }
+        };
+        
+        // Connect to postgres with retries
+        let mut attempt = 0u32;
+        let (client, connection) = loop {
+            match tokio_postgres::connect(&database_url, NoTls).await {
+                Ok(c) => break c,
+                Err(e) => {
+                    attempt += 1;
+                    if attempt >= 15 {
+                        error!("Failed to connect to database after {} attempts: {}", attempt, e);
+                        return;
+                    }
+                    error!("Postgres not ready yet (attempt {}): {}. retrying...", attempt, e);
+                    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+                }
+            }
+        };
+        
+        // Spawn connection driver
+        tokio::spawn(async move {
+            if let Err(e) = connection.await {
+                error!("Postgres connection error: {}", e);
+            }
         });
+        
+        // Initialize schema
+        if let Err(e) = client
+            .execute(
+                "CREATE TABLE IF NOT EXISTS todos (id SERIAL PRIMARY KEY, text TEXT NOT NULL)",
+                &[],
+            )
+            .await
+        {
+            error!("Failed to create todos table: {}", e);
+        }
+        
+        // Insert initial todos if table is empty
+        let row_count: i64 = client
+            .query_one("SELECT COUNT(*) FROM todos", &[])
+            .await
+            .map(|row| row.get(0))
+            .unwrap_or(0);
+        
+        if row_count == 0 {
+            let default_todos = vec![
+                "Buy groceries",
+                "Build a robot who takes over the world",
+                "Eat frozen yogurt",
+            ];
+            
+            for todo in default_todos {
+                if let Err(e) = client.execute("INSERT INTO todos (text) VALUES ($1)", &[&todo]).await {
+                    error!("Failed to insert default todo: {}", e);
+                }
+            }
+        }
+        
+        let client = Arc::new(client);
 
         let app = Router::new()
             .route("/todos", get(get_todos).post(post_todo))
-            .with_state(state);
+            .with_state(client);
 
         let listener = match TcpListener::bind(format!("0.0.0.0:{}", port)).await {
             Ok(l) => l,
