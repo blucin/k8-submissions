@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: wiki-todo-generator
+  namespace: project
+spec:
+  schedule: "0 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: wiki-todo-generator
+          containers:
+          - name: wiki-fetcher
+            image: k3d-local-registry:5000/wiki-todo-generator:latest
+            imagePullPolicy: Always
+            env:
+            - name: BACKEND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config
+                  key: BACKEND_URL
+          restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: wiki-todo-generator
+  namespace: project
